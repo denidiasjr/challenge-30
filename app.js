@@ -68,25 +68,47 @@
       phoneElement.innerHTML = company.phone;
     }
 
+    function createRemoveColumn(carId) {
+      const removeColumn = document.createElement('td');
+      removeColumn.insertAdjacentHTML(
+        'afterbegin', 
+        `<button class="remove-button" car-id="${carId}">Remover</button>`
+      );
+
+      return removeColumn;
+    }
+
     function addCar() {
       const carAttributes = [...document.querySelectorAll('#car_form input')];
       const carsTable = document.querySelector('#cars_table tbody');
       const newCarRow = document.createElement('tr'); 
+      const rowId = Date.now();
+
+      newCarRow.setAttribute('id', rowId);
   
       carAttributes.forEach((elem, index) => {
   
         const newCarColumn = document.createElement('td');
   
         if (index === 0) {
-          newCarColumn.innerHTML = `<img src="${elem.value}"/>`;
+          newCarColumn.insertAdjacentHTML('afterbegin', `<img src="${elem.value}"/>`);
         } else {
-          newCarColumn.innerHTML = elem.value;
+          newCarColumn.insertAdjacentHTML('afterbegin', elem.value);
         }
   
         newCarRow.appendChild(newCarColumn);
       }); 
-  
+
+      // Add remove column
+      const removeColumn = createRemoveColumn(rowId);
+      newCarRow.appendChild(removeColumn);
+
       carsTable.appendChild(newCarRow);
+    }
+
+    function removeCar(carId) {
+      const carRow = document.getElementById(carId);
+      carRow.remove();
     }
 
     function listenToAddcar() {
@@ -100,6 +122,19 @@
       });
     }
 
+    function listenToRemoveCar() {
+
+      const carTable = document.querySelector('#cars_table tbody');
+      carTable.addEventListener('click', event => {
+        
+        const clickedElement = event.target;
+
+        if (clickedElement.classList.contains('remove-button')) {
+          removeCar(clickedElement.getAttribute('car-id'));
+        }
+      });
+    }
+
     function initialize() {
 
       // Get and show company info
@@ -109,8 +144,9 @@
         })
         .catch(alert);
         
-      // Listener to add car operation
+      // Listeners
       listenToAddcar();
+      listenToRemoveCar();
     }
 
     initialize();
