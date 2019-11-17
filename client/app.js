@@ -115,7 +115,7 @@
             reject('Erro ao enviar os dados do carro');
           }
 
-          resolve(carAttributes);
+          resolve(JSON.parse(ajaxRequest.response));
         };
       });
     }
@@ -130,6 +130,7 @@
 
     function showCarsOnTable(cars) {
       const carsTable = document.querySelector('#cars_table tbody');
+      carsTable.innerHTML = '';
       
       cars.forEach(car => {
         
@@ -175,10 +176,13 @@
       carForm.addEventListener('submit', event => {
 
         event.preventDefault();
+
         addCar(getCarInputs())
-          .then(car => 
-            showCarsOnTable([car])
-          )
+          .then(() => {
+            getCars()
+              .then(showCarsOnTable)
+              .catch(alert)
+          })
           .catch(alert);
       });
     }
