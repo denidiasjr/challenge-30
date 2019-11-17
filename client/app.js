@@ -81,6 +81,16 @@
       });
     }
 
+    function createRemoveColumn(carId) {
+      const removeColumn = document.createElement('td');
+      removeColumn.insertAdjacentHTML(
+        'afterbegin', 
+        `<button class="remove-button" car-id="${carId}">Remover</button>`
+      );
+
+       return removeColumn;
+    }
+
     function convertObjectToPost(currentObject) {
       return Object.entries(currentObject).reduce((acum, entry) => {
         const [key, value] = entry;
@@ -124,6 +134,8 @@
       cars.forEach(car => {
         
         const newCarRow = document.createElement('tr'); 
+        const rowId = Date.now();
+        newCarRow.setAttribute('id', rowId);
         
         Object.entries(car).forEach(carAttributes => {
           
@@ -138,6 +150,9 @@
 
           newCarRow.appendChild(newCarColumn);
         });
+
+        const removeColumn = createRemoveColumn(rowId);
+        newCarRow.appendChild(removeColumn);
 
         carsTable.appendChild(newCarRow);
       });
