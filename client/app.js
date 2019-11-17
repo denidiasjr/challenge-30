@@ -60,6 +60,55 @@
       });
     }
 
+    function getCars() {
+      const ajaxRequest = new XMLHttpRequest();
+      ajaxRequest.open('GET', 'http://127.0.0.1:3000/car');
+      ajaxRequest.send();
+      
+      return new Promise((resolve, reject) => {
+        ajaxRequest.onreadystatechange = function() {
+  
+          if (ajaxRequest.readyState !== ajaxRequest.DONE)  {
+            return;
+          }
+
+          if (ajaxRequest.status !== 200) {
+            reject('Erro ao obter os dados dos carros');
+          }
+
+          resolve(JSON.parse(ajaxRequest.response));
+        };
+      });
+    }
+
+    function convertObjectToPost(currentObject) {
+      return Object.entries(currentObject).reduce((acum, entry) => {
+        const [key, value] = entry;
+        return acum + `${key}=${value}&`;
+      }, '');
+    }
+
+    function addCar(carAttributes) {
+      const ajaxRequest = new XMLHttpRequest();
+      ajaxRequest.open('POST', 'http://127.0.0.1:3000/car');
+      ajaxRequest.send(convertObjectToPost(carAttributes));
+      
+      return new Promise((resolve, reject) => {
+        ajaxRequest.onreadystatechange = function() {
+  
+          if (ajaxRequest.readyState !== ajaxRequest.DONE)  {
+            return;
+          }
+
+          if (ajaxRequest.status !== 200) {
+            reject('Erro ao enviar os dados do carro');
+          }
+
+          resolve(JSON.parse(ajaxRequest.response));
+        };
+      });
+    }
+
     function showCompanyInfo(company) {
       const nameElement = document.querySelector('#company h2');
       const phoneElement = document.querySelector('#company h3');
@@ -68,25 +117,34 @@
       phoneElement.innerHTML = company.phone;
     }
 
-    function addCar() {
-      const carAttributes = [...document.querySelectorAll('#car_form input')];
+    function showCarsOnTable(cars) {
       const carsTable = document.querySelector('#cars_table tbody');
-      const newCarRow = document.createElement('tr'); 
-  
-      carAttributes.forEach((elem, index) => {
-  
-        const newCarColumn = document.createElement('td');
-  
-        if (index === 0) {
-          newCarColumn.innerHTML = `<img src="${elem.value}"/>`;
-        } else {
-          newCarColumn.innerHTML = elem.value;
-        }
-  
-        newCarRow.appendChild(newCarColumn);
-      }); 
-  
-      carsTable.appendChild(newCarRow);
+      
+      cars.forEach(car => {
+        
+        const newCarRow = document.createElement('tr'); 
+        
+        Object.entries(car).forEach(carAttributes => {
+          
+          const newCarColumn = document.createElement('td');
+          const [key, value] = carAttributes;
+
+          if (key === 'image') {
+            newCarColumn.insertAdjacentHTML('afterbegin', `<img src="${value}"/>`);
+          } else {
+            newCarColumn.insertAdjacentHTML('afterbegin', value);
+          }
+
+          newCarRow.appendChild(newCarColumn);
+        });
+
+        carsTable.appendChild(newCarRow);
+      });
+    }
+
+    function getCarInputs() {
+      const carAttributes = [...document.querySelectorAll('#car_form input')];
+      return carAttributes.reduce((acumObj, elem) => ({ ...acumObj, [elem.getAttribute('car-attribute')]: elem.value }), {});
     }
 
     function listenToAddcar() {
@@ -96,7 +154,7 @@
       carForm.addEventListener('submit', event => {
 
         event.preventDefault();
-        addCar();
+        addCar(getCarInputs());
       });
     }
 
@@ -104,10 +162,12 @@
 
       // Get and show company info
       getCompanyInfo()
-        .then((company) => {
-          showCompanyInfo(company);
-        })
+        .then(showCompanyInfo)
         .catch(alert);
+
+      getCars()
+        .then(showCarsOnTable)
+        .catch(alert)
         
       // Listener to add car operation
       listenToAddcar();
