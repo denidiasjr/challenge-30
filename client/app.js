@@ -147,6 +147,11 @@
       return carAttributes.reduce((acumObj, elem) => ({ ...acumObj, [elem.getAttribute('car-attribute')]: elem.value }), {});
     }
 
+    function removeCar(carId) {
+      const carRow = document.getElementById(carId);
+      carRow.remove();
+    }
+
     function listenToAddcar() {
 
       const carForm = document.querySelector('#car_form');
@@ -155,6 +160,19 @@
 
         event.preventDefault();
         addCar(getCarInputs());
+      });
+    }
+
+    function listenToRemoveCar() {
+
+      const carTable = document.querySelector('#cars_table tbody');
+      carTable.addEventListener('click', event => {
+        
+        const clickedElement = event.target;
+
+        if (clickedElement.classList.contains('remove-button')) {
+          removeCar(clickedElement.getAttribute('car-id'));
+        }
       });
     }
 
@@ -169,8 +187,9 @@
         .then(showCarsOnTable)
         .catch(alert)
         
-      // Listener to add car operation
+      // Listeners
       listenToAddcar();
+      listenToRemoveCar();
     }
 
     initialize();
