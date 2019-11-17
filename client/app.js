@@ -81,11 +81,34 @@
       });
     }
 
-    function createRemoveColumn(carId) {
+    function removeCar(carPlate) {
+      
+      const ajaxRequest = new XMLHttpRequest();
+      ajaxRequest.open('DELETE', 'http://127.0.0.1:3000/car');
+      ajaxRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      ajaxRequest.send(`plate=${carPlate}`);
+      
+      return new Promise((resolve, reject) => {
+        ajaxRequest.onreadystatechange = function() {
+  
+          if (ajaxRequest.readyState !== ajaxRequest.DONE)  {
+            return;
+          }
+
+          if (ajaxRequest.status !== 200) {
+            reject('Erro ao remover os dados do carro');
+          }
+
+          resolve(JSON.parse(ajaxRequest.response));
+        };
+      });
+    }
+
+    function createRemoveColumn(carPlate) {
       const removeColumn = document.createElement('td');
       removeColumn.insertAdjacentHTML(
         'afterbegin', 
-        `<button class="remove-button" car-id="${carId}">Remover</button>`
+        `<button class="remove-button" car-plate="${carPlate}">Remover</button>`
       );
 
        return removeColumn;
@@ -135,8 +158,6 @@
       cars.forEach(car => {
         
         const newCarRow = document.createElement('tr'); 
-        const rowId = Date.now();
-        newCarRow.setAttribute('id', rowId);
         
         Object.entries(car).forEach(carAttributes => {
           
@@ -152,7 +173,7 @@
           newCarRow.appendChild(newCarColumn);
         });
 
-        const removeColumn = createRemoveColumn(rowId);
+        const removeColumn = createRemoveColumn(car.plate);
         newCarRow.appendChild(removeColumn);
 
         carsTable.appendChild(newCarRow);
@@ -162,11 +183,6 @@
     function getCarInputs() {
       const carAttributes = [...document.querySelectorAll('#car_form input')];
       return carAttributes.reduce((acumObj, elem) => ({ ...acumObj, [elem.getAttribute('car-attribute')]: elem.value }), {});
-    }
-
-    function removeCar(carId) {
-      const carRow = document.getElementById(carId);
-      carRow.remove();
     }
 
     function listenToAddcar() {
@@ -195,7 +211,14 @@
         const clickedElement = event.target;
 
         if (clickedElement.classList.contains('remove-button')) {
-          removeCar(clickedElement.getAttribute('car-id'));
+
+          removeCar(clickedElement.getAttribute('car-plate'))
+            .then(() => {
+              getCars()
+              .then(showCarsOnTable)
+              .catch(alert)
+            })
+            .catch(alert)
         }
       });
     }
