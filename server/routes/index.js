@@ -24,7 +24,6 @@ router.post('/', function(req, res) {
     plate: req.body.plate,
     color: req.body.color 
   });
-  console.log(data);
   res.json({ message: 'success' });
 });
 

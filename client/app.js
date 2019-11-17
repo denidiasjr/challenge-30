@@ -91,6 +91,7 @@
     function addCar(carAttributes) {
       const ajaxRequest = new XMLHttpRequest();
       ajaxRequest.open('POST', 'http://127.0.0.1:3000/car');
+      ajaxRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
       ajaxRequest.send(convertObjectToPost(carAttributes));
       
       return new Promise((resolve, reject) => {
@@ -104,7 +105,7 @@
             reject('Erro ao enviar os dados do carro');
           }
 
-          resolve(JSON.parse(ajaxRequest.response));
+          resolve(carAttributes);
         };
       });
     }
@@ -159,7 +160,11 @@
       carForm.addEventListener('submit', event => {
 
         event.preventDefault();
-        addCar(getCarInputs());
+        addCar(getCarInputs())
+          .then(car => 
+            showCarsOnTable([car])
+          )
+          .catch(alert);
       });
     }
 
